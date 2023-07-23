@@ -1,1 +1,3 @@
 # eCommerceWebScraping
+
+Starting the project.
