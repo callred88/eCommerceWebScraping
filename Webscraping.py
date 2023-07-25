@@ -18,32 +18,48 @@ scraper = webdriver.Chrome(service=browser_driver)
 scraper.get("https://webscraper.io/test-sites/e-commerce/static/computers/laptops")
 
 #Waiting call to handle cookies popup. 
-#cookies = WebDriverWait(scraper, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'acceptCookies')).click())
+# cookies = WebDriverWait(scraper, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'acceptCookies')).click())
 wait = WebDriverWait(scraper,10)
 cookies_wait = scraper.find_element(By.CLASS_NAME, "acceptCookies")
 wait.until(EC.element_to_be_clickable(cookies_wait))
-
+cookies_wait.click()
 data= []
+unique_id = 0
+while True:
+    itemCards = scraper.find_elements(By.CLASS_NAME, "thumbnail")
+    
+    for items in itemCards:
+        name = WebDriverWait(scraper, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "title"))
+        )
+        fname = items.find_element(By.CLASS_NAME, "title").get_attribute("title")
+        price =  WebDriverWait(scraper, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "pull-right.price"))
+        )
+        fprice = items.find_element(By.CLASS_NAME, "pull-right.price").text
 
-itemCards = scraper.find_elements(By.CLASS_NAME, "thumbnail")
-unique_id = 1
-for items in itemCards:
-    name = items.find_element(By.CLASS_NAME, "title")
-    price = items.find_element(By.XPATH, "/html/body/div[1]/div[3]/div/div[2]/div/div[6]/div/div[1]/h4[1]")
-    specifications = items.find_element(By.CLASS_NAME, "description")
-    number_of_reviews = items.find_element(By.CLASS_NAME, "ratings")
-    writer.writerow(
-    [unique_id, name.text, price.text, specifications.text, number_of_reviews.text])
-    unique_id += 1
-
+        specifications =  WebDriverWait(scraper, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "description"))
+        )
+        fspecifications = items.find_element(By.CLASS_NAME, "description").text
+        number_of_reviews = WebDriverWait(scraper, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ratings"))
+        )
+        fnumber_of_reviews = items.find_element(By.CLASS_NAME, "ratings").text
+        unique_id += 1
+        writer.writerow(
+           [unique_id, fname, fprice, fspecifications, fnumber_of_reviews])
+        # data.append([unique_id, name, price, specifications, number_of_reviews])
     try:
         scraper.find_element(By.LINK_TEXT, "›").click()
+            
         
     except NoSuchElementException:
         break
-
-
-file.close
-scraper.quit
+    
+  
+    scraper.quit
+    file.close
+    
 
 
